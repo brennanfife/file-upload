@@ -14,10 +14,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button"
-import Chip from "@material-ui/core/Chip";
 import Grid from "@material-ui/core/Grid";
 
-import { Formik, Form, useField } from 'formik';
+import { Formik, Form, useField, Field, FieldArray } from 'formik';
 import * as yup from 'yup';
 import ChipInput from 'material-ui-chip-input'
 
@@ -45,24 +44,7 @@ const validationSchema = yup.object().shape({
 });
 
 const FileDialog = ({ open, onClose }) => {
-    //! COMBINE THESE TWO AND GIVE IT A TIME AUTOMATICALLY
     const [files, setFiles] = useState([])
-    // const [input, setInput] = useState({
-    //     name: "",
-    //     tags: ""
-    // })
-
-    const chipRenderer = ({ chip, className, handleClick, handleDelete }, key) => (
-        <Chip
-            label={chip}
-            className={className}
-            onClick={handleClick}
-            onDelete={handleDelete}
-            key={key}
-            size="small"
-            color='primary'
-        />
-    );
 
     return (
         <Dialog fullWidth maxWidth="md" onClose={onClose} open={open}>
@@ -76,8 +58,8 @@ const FileDialog = ({ open, onClose }) => {
                 }}
                 validationSchema={validationSchema}
                 onSubmit={(data, { setSubmitting }) => {
-                    console.log('fileName:', data)
-
+                    console.log('fileName:', data.fileName)
+                    console.log('tags:', data.tags)
 
                     setSubmitting(false);
                     //* make async call
@@ -98,12 +80,23 @@ const FileDialog = ({ open, onClose }) => {
                                 />
                             </Grid>
                             <Grid item xs>
-                                <ChipInput
-                                    chipRenderer={chipRenderer}
-                                    label="Tags"
-                                    margin="normal"
-                                    fullWidth
+                                <FieldArray
+                                    name="tags"
+                                    render={arrayHelpers => (
+                                        <Field name="tags">
+                                            {({field}) => 
+                                                <ChipInput
+                                                    label='Tags'
+                                                    fullWidth
+                                                    margin="normal"
+                                                    value={field.value}
+                                                    onAdd={chip => arrayHelpers.push(chip)}
+                                                    onDelete={chip => arrayHelpers.remove(chip)}
+                                                />}
+                                        </Field>
+                                    )}
                                 />
+
                             </Grid>
                             <Grid item xs>
                                 <FilePond
